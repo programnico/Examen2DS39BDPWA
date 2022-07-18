@@ -1,0 +1,163 @@
+﻿@model Examen2DS39B.Models.cliente
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    if (ViewBag.msj != null)
+    {
+        switch (ViewBag.msj)
+        {
+            case "Guardado":
+                <script>alert('Registro guardado con exito');</script>
+                break;
+            case "Eliminado":
+                <script>alert('Registro eliminado con exito');</script>
+                break;
+            case "Modificado":
+                <script>alert('Registro modificado con exito');</script>
+                break;
+            case "existe":
+                <script>alert('El código de usuario y nit ya estan en uso');</script>
+                break;
+            case "existe_nit":
+                <script>alert('El nit ya estan en uso');</script>
+                break;
+            case "existe_codigo":
+                <script>alert('El código de usuario ya estan en uso');</script>
+                break;
+            case "Datos":
+                <script>alert('Los datos ingresados parecen no correctos :( :) ');</script>
+                break;
+        }
+    }
+}
+
+<pre>
+Session iniciada usuario: @Session["nombre"]  (@Session["nit"]) | @Html.ActionLink("Cerrar session", "Salir", "Login")
+</pre>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+            <h3>Gestionar clientes</h3>
+            @using (Html.BeginForm("Index", "Cliente", FormMethod.Post, htmlAttributes: new { id = "form2" }))
+            {
+                //@Html.ValidationSummary("", new { @class = "text-danger", })
+                @Html.ValidationMessage("cod_cliente", new { @class = "text-danger" })
+                @Html.LabelFor(x => x.cod_cliente, htmlAttributes: new { @class = "label label-info", id = "lblCodigo" })
+                @Html.TextBoxFor(x => x.cod_cliente, htmlAttributes: new { @class = "form-control" })<br>
+
+                @Html.ValidationMessage("nombre_cliente", new { @class = "text-danger" })
+                @Html.LabelFor(x => x.nombre_cliente, htmlAttributes: new { @class = "label label-info" })
+                @Html.TextBoxFor(x => x.nombre_cliente, htmlAttributes: new { @class = "form-control" })<br>
+
+                @Html.ValidationMessage("nit", new { @class = "text-danger" }, "cliente")
+                @Html.LabelFor(x => x.nit, htmlAttributes: new { @class = "label label-info" })
+                @Html.TextBoxFor(x => x.nit, htmlAttributes: new { @class = "form-control" })<br>
+
+                @Html.ValidationMessage("rol", new { @class = "text-danger" })
+                @Html.LabelFor(x => x.rol, htmlAttributes: new { @class = "label label-info" })
+                @Html.DropDownListFor(x => x.rol, (IEnumerable<SelectListItem>)ViewBag.roles, htmlAttributes: new { @class = "form-control" })
+                <br>
+                <input type="submit" value="Guardar" id="btnGuardar" name="boton" class="btn btn-success" />
+
+                <input type="submit" onclick="javascript:confirmAlert()" value="Eliminar" id="btnEliminar" name="boton" class="btn btn-danger" />
+
+                <input type="submit" onclick="javascript:confirmAlert()" value="Modificar" id="btnModificar" name="boton" class="btn btn-info" />
+                <a href="javascript:resetForm()" value="Reset" id="btnReset" name="btnReset" class="bottom btn btn-warning">Reset</a>
+            }
+        </div>
+        <div class="col-sm-12 col-md-8 col-lg-8">
+            <h3>Clientes</h3>
+
+            <div id="contenido">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Código cliente</th>
+                            <th>Nombre cliente</th>
+                            <th>NIT</th>
+                            <th>Rol</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (Examen2DS39B.Models.cliente item in ViewBag.data)
+                            {
+                                <tr>
+                                    <td>@item.cod_cliente</td>
+                                    <td>@item.nombre_cliente</td>
+                                    <td>@item.nit</td>
+                                    <td>@item.rol</td>
+
+                                    <td>
+                                        <a href="javascript:cargar('@item.cod_cliente','@item.nombre_cliente','@item.nit','@item.rol', 'eli')">Eliminar</a>
+                                        -  <a href="javascript:cargar('@item.cod_cliente','@item.nombre_cliente','@item.nit','@item.rol', 'mod')">Modificar</a>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function confirmAlert() {
+        var r = confirm("¿Desea continuar con la operación?");
+
+        if (r == false) {
+            event.preventDefault();
+            $("#btnGuardar").show();
+            $("#btnModificar").hide();
+            $("#btnEliminar").hide();
+            document.getElementById("cod_cliente").removeAttribute("readonly", "");
+            document.getElementById("cod_cliente").value = "";
+            document.getElementById("nombre_cliente").value = "";
+            document.getElementById("nit").value = "";
+            document.getElementById("rol").value = "administrador";
+        }
+    }
+
+    function resetForm() {
+        $("#btnGuardar").show();
+        $("#btnModificar").hide();
+        $("#btnEliminar").hide();
+        document.getElementById("cod_cliente").removeAttribute("readonly", "");
+        document.getElementById("cod_cliente").value = "";
+        document.getElementById("nombre_cliente").value = "";
+        document.getElementById("nit").value = "";
+        document.getElementById("rol").value = "administrador";
+    }
+
+    function cargar(cod, nombre, nit, rol, opcion) {
+        document.getElementById("cod_cliente").value = cod;
+        document.getElementById("cod_cliente").setAttribute("readonly", "true");
+        document.getElementById("nombre_cliente").value = nombre;
+        document.getElementById("nit").value = nit;
+        document.getElementById("rol").value = rol;
+
+        if (opcion == "eli") {
+            $("#btnGuardar").hide();
+            $("#btnModificar").hide();
+            $("#btnEliminar").show();
+        } else if (opcion == "mod") {
+            $("#btnGuardar").hide();
+            $("#btnModificar").show();
+            $("#btnEliminar").hide();
+        }
+    }
+
+    window.onload = onloadPage();
+    function onloadPage() {
+        $("#btnGuardar").show();
+        $("#btnModificar").hide();
+        $("#btnEliminar").hide();
+    }
+</script>

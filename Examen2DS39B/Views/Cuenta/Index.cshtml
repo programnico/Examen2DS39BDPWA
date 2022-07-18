@@ -1,0 +1,159 @@
+﻿@model Examen2DS39B.Models.cuenta
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    if (ViewBag.msj != null)
+    {
+        switch (ViewBag.msj)
+        {
+            case "Guardado":
+                <script>alert('Registro guardado con exito, el saldo inicial es 0 (CERO) ');</script>
+                break;
+            case "Existe":
+                <script>alert('El usuario ya posee una cuenta');</script>
+                break;
+            case "Datos":
+                <script>alert('Los datos ingresados parecen no correctos :( :) ');</script>
+                break;
+        }
+    }
+}
+
+<pre>
+Session iniciada usuario: @Session["nombre"]  (@Session["nit"]) | @Html.ActionLink("Cerrar session", "Salir", "Login")
+</pre>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 col-md-4 col-lg-4">
+            <h3>Crear Cuentas</h3>
+            @using (Html.BeginForm("Index", "Cuenta", FormMethod.Post, htmlAttributes: new { id = "formCuenta" }))
+            {
+
+                @Html.LabelFor(x => x.cod_cliente, htmlAttributes: new { @class = "label label-info" })
+                @Html.DropDownListFor(x => x.cod_cliente, (IEnumerable<SelectListItem>)ViewBag.clientes, htmlAttributes: new { id = "idCliente", @class = "form-control" }) <br>
+                @Html.LabelFor(x => x.ncta, htmlAttributes: new { @class = "label label-info" })
+                @Html.TextBoxFor(x => x.ncta, htmlAttributes: new { @class = "form-control" })<br>
+                @Html.LabelFor(x => x.saldo, htmlAttributes: new { @class = "label label-info" })
+                @Html.TextBoxFor(x => x.saldo, htmlAttributes: new { @class = "form-control", @readonly = "true" })<br>
+
+                <input type="submit" id="btnGuardar" value="Guardar" name="boton" class="btn btn-primary" />
+                <a href="javascript:resetForm()" value="Reset" id="btnReset" name="btnReset" class="bottom btn btn-warning">Reset</a>
+
+            }
+        </div>
+        <div class="col-sm-12 col-md-4 col-lg-4">
+            <h3>Detalle de clientes</h3>
+            <div id="resultado">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12 col-md-8 col-lg-8">
+            <h3>Cuenta</h3>
+
+            <div id="contenido">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Código cliente</th>
+                            <th>Número cuenta</th>
+                            <th>SALDO</th>
+                            <th>OPCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (Examen2DS39B.Models.cuenta item in ViewBag.dataCuentas)
+                            {
+                                <tr>
+                                    <td>@item.cod_cliente</td>
+                                    <td>@item.ncta</td>
+                                    <td>$ @item.saldo</td>
+                                    <td>
+                                        <a href="javascript:cargar('@item.cod_cliente','@item.ncta','@item.saldo')">Seleccionar</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    window.onload = onloadPage();
+    function onloadPage() {
+        document.getElementById("saldo").value = "0";
+    }
+
+    function resetForm() {
+        document.getElementById("ncta").value = "";
+        document.getElementById("saldo").value = "0";
+        refresh();
+    }
+
+    function cargar(cod, cuenta, saldo) {
+        document.getElementById("idCliente").value = cod;
+        document.getElementById("ncta").value = cuenta;
+        document.getElementById("saldo").value = saldo;
+        refresh();
+    }
+
+    var cbCliente = document.getElementById("idCliente");
+    cbCliente.addEventListener("change", refresh);
+    refresh();
+    function refresh() {
+        fetch("@Url.Content("~/Cuenta/cargarDetalleCliente")" + "?idCliente=" + cbCliente.value)
+            .then(function (result) {
+                if (result.ok) {
+                    return result.json();
+                }
+            })
+            .then(function (data) {
+                console.log(data);
+                //let cbo = document.getElementById("municipio");
+                cbo = document.getElementById("resultado");
+                cbo.innerHTML = "";
+                data.forEach(function (element) {
+                    let opt = document.createElement("b");
+                    opt.appendChild(document.createTextNode("Codigo: "));
+                    let optCodigo = document.createElement("p");
+                    optCodigo.appendChild(document.createTextNode(element.cod_cliente));
+
+                    let opt2 = document.createElement("b");
+                    opt2.appendChild(document.createTextNode("Nombre: "));
+                    let optNombre = document.createElement("p");
+                    optNombre.appendChild(document.createTextNode(element.nombre_cliente));
+
+                    let opt3 = document.createElement("b");
+                    opt3.appendChild(document.createTextNode("NIT: "));
+                    let optNit = document.createElement("p");
+                    optNit.appendChild(document.createTextNode(element.nit));
+
+                    let opt4 = document.createElement("b");
+                    opt4.appendChild(document.createTextNode("Rol: "));
+                    let optRol = document.createElement("p");
+                    optRol.appendChild(document.createTextNode(element.rol));
+
+                    //opt.value = element.nit;
+                    cbo.appendChild(opt);
+                    cbo.appendChild(optCodigo);
+                    cbo.appendChild(opt2);
+                    cbo.appendChild(optNombre);
+                    cbo.appendChild(opt3);
+                    cbo.appendChild(optNit);
+                    cbo.appendChild(opt4);
+                    cbo.appendChild(optRol);
+                })
+            })
+    }
+
+</script>

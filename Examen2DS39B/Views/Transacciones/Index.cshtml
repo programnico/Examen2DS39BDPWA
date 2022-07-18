@@ -1,0 +1,169 @@
+﻿@model Examen2DS39B.Models.transacciones
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    if (ViewBag.msj == "numero transacciones")
+    {
+        <script>
+            alert('El numero de transacciones por dia ha sido completado, solo se permiten 10 -- DIEZ :( --');
+        </script>
+    }
+    else if (ViewBag.msj == "Procesado")
+    {
+        <script>
+            alert('Datos procesados correctamente');
+        </script>
+    }
+    else if (ViewBag.msj == "monto no disponible")
+    {
+        <script>
+            alert('No se puede retirar el monto digitado, excede el monto disponible!!');
+        </script>
+    }
+    else if (ViewBag.msj == "No se puede retirar")
+    {
+        <script>
+            alert('No se puede retirar el monto digitado, el saldo disponible es 0 -- CERO -- !!');
+        </script>
+    }
+    else if (ViewBag.msj == "Datos")
+    {
+        <script>alert('Los datos ingresados parecen no correctos :( :) ');</script>
+
+    }
+
+}
+
+<pre>
+Session iniciada usuario: @Session["nombre"]  (@Session["nit"]) | @Html.ActionLink("Cerrar session", "Salir", "Login")
+</pre>
+
+<div class="container ">
+    <div class="row">
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <h3 class="">Detalle cuenta</h3>
+            <div id="resultCuenta" class="">
+                @{
+                    foreach (Examen2DS39B.Models.cuenta item in ViewBag.dataDetalle)
+                    {
+                        <table class="table table-hover ">
+                            <tr>
+                                <th scope="row">Cuenta </th>
+                                <td> <div id="cuentan">@item.ncta</div>  </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Saldo </th>
+                                <td>$ @item.saldo</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Cliente</th>
+                                <td>@item.cliente.nombre_cliente</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Nit</th>
+                                <td>@item.cliente.nit</td>
+                            </tr>
+                        </table>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-sm-12 col-md-6 col-lg-6">
+            <h3>
+                Nueva transacción
+            </h3>
+            @using (Html.BeginForm("Transacciones", "Transacciones", FormMethod.Post, htmlAttributes: new { id = "form1" }))
+            {
+                @Html.ValidationSummary("", new { @class = "text-danger" })
+                @Html.ValidationMessage("monto", new { @class = "text-danger" })
+                @Html.LabelFor(x => x.monto, htmlAttributes: new { @class = "label label-info" })
+                @Html.TextBoxFor(x => x.monto, htmlAttributes: new { @class = "form-control" })<br>
+
+                @Html.LabelFor(x => x.tipo, htmlAttributes: new { @class = "label label-info" })
+                @Html.DropDownListFor(x => x.tipo, (IEnumerable<SelectListItem>)ViewBag.opciones, htmlAttributes: new { id = "txtTipo", @class = "form-control" })
+
+                @Html.LabelFor(x => x.ncta, htmlAttributes: new { @class = "label label-info" })
+                @Html.TextBoxFor(x => x.ncta, htmlAttributes: new { @class = "form-control", @readonly = "true" })<br>
+                @Html.LabelFor(x => x.fecha, htmlAttributes: new { @class = "label label-info" })
+                @Html.EditorFor(x => x.fecha, new { htmlAttributes = new { @class = "form-control", @readonly = "true" } })<br>
+
+                <input type="submit" id="btnProcesar" value="Procesar" name="boton" class="btn btn-primary" onclick="confirmAlert();" />
+
+            }
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xs-12">
+            <h3>Transacciones</h3>
+            <div id="resultTransacciones">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>codigo</th>
+                            <th>Cuenta</th>
+                            <th>Tipo</th>
+                            <th>monto</th>
+                            <th>fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (Examen2DS39B.Models.transacciones item in ViewBag.dataTransacciones)
+                            {
+                                <tr>
+                                    <td>@item.cod_transac</td>
+                                    <td>@item.ncta</td>
+                                    <td>@item.tipo</td>
+                                    <td>$ @item.monto</td>
+                                    <td>@item.fecha</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function confirmAlert() {
+        var r = confirm("¿Desea continuar con la operación?");
+
+        if (r == false) {
+            event.preventDefault();
+        }
+    }
+
+    window.onload = onloadPage();
+
+    function onloadPage() {
+
+        document.getElementById("ncta").value = document.getElementById("cuentan").textContent;
+
+        const date = new Date();
+        const dia = date.getDate();
+        const mes = date.getMonth() + 1;
+        const ano = date.getFullYear();
+        var fecha;
+        if (mes < 10 && dia < 10) {
+            fecha = ano + "-0" + mes + "-0" + dia;
+        } else if (mes < 10) {
+            fecha = ano + "-0" + mes + "-" + dia;
+        } else if (dia < 10) {
+            fecha = ano + "-" + mes + "-0" + dia;
+        } else {
+            fecha = ano + "-" + mes + "-" + dia;
+        }
+        document.getElementById("fecha").value = fecha;
+
+    }
+
+</script>
